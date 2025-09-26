@@ -1,0 +1,97 @@
+############################################################
+#                        PROJECTS
+############################################################
+
+# ---------------- GET All Projects ----------------
+GET http://localhost:3000/projects/
+Content-Type: application/json
+
+###
+
+# ---------------- GET Project by ID ----------------
+GET http://localhost:3000/projects/1
+Content-Type: application/json
+
+###
+
+# ---------------- Add New Project ----------------
+POST http://localhost:3000/projects/
+Content-Type: application/json
+{
+  "name": "Jobby App",
+  "description": "Job search application"
+}
+
+POST http://localhost:3000/skills/
+Content-Type: application/json
+{
+    id:1,
+    category: "Frontend",
+    label: "HTML",
+    imgUrl: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg"
+}
+
+###
+GET http://localhost:3000/tables/
+
+
+# ---------------- Update Project ----------------
+PUT http://localhost:3000/projects/1
+Content-Type: application/json
+
+{
+  "name": "Jobby App Updated",
+  "description": "Updated description"
+}
+
+###
+
+# ---------------- Delete Project ----------------
+DELETE http://localhost:3000/projects/
+
+
+###
+
+############################################################
+#                        CONTACTS
+############################################################
+
+# ---------------- GET All Contacts ----------------
+GET http://localhost:3000/contacts/
+Content-Type: application/json
+
+###
+
+# ---------------- GET Contact by ID ----------------
+GET http://localhost:3000/contacts/1
+Content-Type: application/json
+
+###
+
+# ---------------- Add New Contact ----------------
+POST http://localhost:3000/contacts/
+Content-Type: application/json
+
+{
+  "name": "Mahesh",
+  "email": "mahesh@example.com",
+  "message": "Hello from portfolio!"
+}
+
+###
+
+# ---------------- Update Contact ----------------
+PUT http://localhost:3000/contact/1
+Content-Type: application/json
+
+{
+  "name": "Mahesh Updated",
+  "email": "mahesh@example.com",
+  "message": "Updated message"
+}
+
+###
+
+# ---------------- Delete Contact ----------------
+DELETE http://localhost:3000/contact/1
+Content-Type: application/json
