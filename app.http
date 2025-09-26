@@ -32,7 +32,7 @@ Content-Type: application/json
 }
 
 ###
-GET http://localhost:3000/tables/
+GET http://localhost:3000/skills/
 
 
 # ---------------- Update Project ----------------
