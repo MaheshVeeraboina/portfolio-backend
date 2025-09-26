@@ -26,6 +26,15 @@ const initializeDbAndServer = async () => {
     `);
 
     await database.exec(`
+      CREATE TABLE IF NOT EXISTS skill (
+        id INTEGER PRIMARY KEY AUTOINCREMENT, 
+        category TEXT,
+        label TEXT,
+        imageUrl TEXT
+      );
+    `);
+
+    await database.exec(`
       CREATE TABLE IF NOT EXISTS contact (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT,
