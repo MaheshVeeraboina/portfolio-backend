@@ -1,22 +1,25 @@
 const express = require("express");
+const cors = require("cors");
 const { open } = require("sqlite");
 const sqlite3 = require("sqlite3");
 const path = require("path");
 
-const databasePath = path.join(__dirname, "portfolio.db");
-
 const app = express();
 app.use(express.json());
+app.use(cors());
 
+const databasePath = path.join(__dirname, "portfolio.db");
 let database = null;
 
+// Initialize DB and server
 const initializeDbAndServer = async () => {
   try {
     database = await open({
       filename: databasePath,
-      driver: sqlite3.Database,
+      driver: sqlite3.Database
     });
 
+    // Create tables if they don't exist
     await database.exec(`
       CREATE TABLE IF NOT EXISTS project (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -27,7 +30,7 @@ const initializeDbAndServer = async () => {
 
     await database.exec(`
       CREATE TABLE IF NOT EXISTS skill (
-        id INTEGER PRIMARY KEY AUTOINCREMENT, 
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
         category TEXT,
         label TEXT,
         imageUrl TEXT
@@ -43,11 +46,12 @@ const initializeDbAndServer = async () => {
       );
     `);
 
-    app.listen(3000, () =>
-      console.log("Server Running at http://localhost:3000/")
-    );
+    const PORT = process.env.PORT || 3000;
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
   } catch (error) {
-    console.log(`DB Error: ${error.message}`);
+    console.error(`DB Error: ${error.message}`);
     process.exit(1);
   }
 };
@@ -55,109 +59,65 @@ const initializeDbAndServer = async () => {
 initializeDbAndServer();
 
 /* -------------------- PROJECTS -------------------- */
-
-// Get all projects
-app.get("/projects/", async (req, res) => {
-  const getProjectsQuery = `SELECT * FROM project;`;
-  const projects = await database.all(getProjectsQuery);
+app.get("/projects", async (req, res) => {
+  const projects = await database.all(`SELECT * FROM project`);
   res.send(projects);
 });
 
-app.post("/projects/", async (req, res) => {
+app.post("/projects", async (req, res) => {
   const { name, description } = req.body;
-  const addProjectQuery = `
-    INSERT INTO project (name, description)
-    VALUES ('${name}', '${description}');
-  `;
-  await database.run(addProjectQuery);
-  res.send('Project Successfully Added  ');
+  await database.run(`INSERT INTO project (name, description) VALUES (?, ?)`, [name, description]);
+  res.send("Project added successfully");
 });
 
-app.put("/projects/:id/", async (req, res) => {
+app.put("/projects/:id", async (req, res) => {
   const { id } = req.params;
   const { name, description } = req.body;
-  const updateProjectQuery = `
-
-    UPDATE project
-    SET name = '${name}',
-        description = '${description}'  
-    WHERE id = ${id};
-  `;
-  await database.run(updateProjectQuery);
-  res.send("Project Updated Successfully");
-} );
-
-
-app.delete("/projects/", async (req, res) => {  
-        const deleteAllProjectsQuery = `DELETE FROM project;`;
-        await database.run(deleteAllProjectsQuery);
-        res.send("All Projects Deleted Successfully");
+  await database.run(`UPDATE project SET name = ?, description = ? WHERE id = ?`, [name, description, id]);
+  res.send("Project updated successfully");
 });
 
-app.delete("/projects/:id/", async (req, res) => {
+app.delete("/projects/:id", async (req, res) => {
   const { id } = req.params;
-  const deleteProjectQuery = `DELETE FROM project WHERE id = ${id};`;
-  await database.run(deleteProjectQuery);
-  res.send("Project Deleted Successfully");
+  await database.run(`DELETE FROM project WHERE id = ?`, [id]);
+  res.send("Project deleted successfully");
 });
 
-
+/* -------------------- SKILLS -------------------- */
 app.get("/skills", async (req, res) => {
-  const getSkillsQuery = `SELECT * FROM skill;`;
-  const skills = await database.all(getSkillsQuery);
+  const skills = await database.all(`SELECT * FROM skill`);
   res.send(skills);
 });
 
-app.post("/skills/", async (req, res) => {
-  const { category,label,imageUrl } = req.body;
-  const addSkillQuery = `
-    INSERT INTO skill (category,label,imageUrl)
-    VALUES ('${category}', '${label}', '${imageUrl}');
-  `;
-  await database.run(addSkillQuery);
-  res.send('Skill Successfully Added  ');
+app.post("/skills", async (req, res) => {
+  const { category, label, imageUrl } = req.body;
+  await database.run(`INSERT INTO skill (category, label, imageUrl) VALUES (?, ?, ?)`, [category, label, imageUrl]);
+  res.send("Skill added successfully");
 });
 
-app.delete("/skills/", async (req, res) => {
-        const deleteAllSkillsQuery = `DELETE FROM skill;`;
-        await database.run(deleteAllSkillsQuery);
-        res.send("All Skills Deleted Successfully");
-}
-);
-
-app.delete("/skills/:id/", async (req, res) => {
+app.put("/skills/:id", async (req, res) => {
   const { id } = req.params;
-  const deleteSkillQuery = `DELETE FROM skill WHERE id = ${id};`;
-  await database.run(deleteSkillQuery);
-  res.send("Skill Deleted Successfully");
-} );
+  const { category, label, imageUrl } = req.body;
+  await database.run(`UPDATE skill SET category = ?, label = ?, imageUrl = ? WHERE id = ?`, [category, label, imageUrl, id]);
+  res.send("Skill updated successfully");
+});
 
-app.put("/skills/:id/", async (req, res) => {
+app.delete("/skills/:id", async (req, res) => {
   const { id } = req.params;
-  const { category,label,imageUrl } = req.body; 
-  const updateSkillQuery = `
-    UPDATE skill
-    SET category = '${category}',
-        label = '${label}', 
-        imageUrl = '${imageUrl}'
-    WHERE id = ${id};
-  `;
-  await database.run(updateSkillQuery);
-  res.send("Skill Updated Successfully");
-} );
+  await database.run(`DELETE FROM skill WHERE id = ?`, [id]);
+  res.send("Skill deleted successfully");
+});
 
-app.get("/contacts/", async (req, res) => {
-  const getContactsQuery = `SELECT * FROM contact;`;
-  const contacts = await database.all(getContactsQuery);
+/* -------------------- CONTACT -------------------- */
+app.get("/contacts", async (req, res) => {
+  const contacts = await database.all(`SELECT * FROM contact`);
   res.send(contacts);
 });
 
-app.post("/contacts/", async (req, res) => {
+app.post("/contacts", async (req, res) => {
   const { name, email, message } = req.body;
-  const addContactQuery = `insert into contact (name,email,message) values ('${name}','${email}','${message}');`;
-  await database.run(addContactQuery);
-  res.send("Message Sent Successfully");
-} );
-
+  await database.run(`INSERT INTO contact (name, email, message) VALUES (?, ?, ?)`, [name, email, message]);
+  res.send("Message sent successfully");
+});
 
 module.exports = app;
